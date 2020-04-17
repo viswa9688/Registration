@@ -1,8 +1,11 @@
+import os
 from flask import Flask,render_template
 
 from wtform_fields import *
 
 from models import *
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 #standard flask instruction set by python community to call Flask 
 
@@ -17,6 +20,8 @@ app.config['SQLALCHEMY_DATABASE_URI']='postgres://wcutqjafaveqdv:f3e6dd068c0a38e
 
 # Initialzie a connection to our database
 db=SQLAlchemy(app)
+# engine=create_engine(os.getenv("SQLALCHEMY_DATABASE_URI"))
+# db1=scoped_session(sessionmaker(bind=engine))
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -29,13 +34,11 @@ def index():
         password=reg_form.password.data
 
         #check if user name exists
-        user_object=User.query.filter_by(username=username).first()
+       
         #To check whether the password exists or not, not necessary here
         # user_object.password=User.query.filter_by(password=password).first()
 
-        if user_object:
-            return " Some one else has already taken this username"
-
+        
         # now, we add this to our database if the data passed by user has passed all validations and is not a duplicate
         # lets create a user object with user name and password as two columns which will get added into our sql table.
         user=User(username=username,password=password)
@@ -44,6 +47,12 @@ def index():
         return " Inserted into DB "
 
     return render_template("index.html", form=reg_form)
+# @app.route("/admin")
+# def admin():
+#     users=db1.execute("Select username from User")
+#     for i in users:
+#         print(users)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
